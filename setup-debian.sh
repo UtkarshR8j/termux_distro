@@ -52,7 +52,7 @@ print_message "OpenSSH installed successfully." "green"
 progress_bar 20
 
 # Step 2: Configuring SSH to listen on port 8022
-print_message "=== Step 2: Configuring SSH on port 8022 ===" "blue"
+print_message "=== Step 2: Configuring SSH on port 8022 in Termux ===" "blue"
 print_message "Configuring SSH to listen on port 8022..." "yellow"
 sed -i 's/^#Port 22/Port 8022/' $PREFIX/etc/ssh/sshd_config
 echo "PasswordAuthentication yes" >> $PREFIX/etc/ssh/sshd_config
@@ -106,8 +106,16 @@ echo 'utk:utkarsh1850' | sudo chpasswd
 
 print_message "SSH service set up and user 'utk' created inside Debian." "green"
 
-# Step 7: Move to the lowermost directory and start SSH manually inside Debian
-print_message "=== Step 6: Starting SSH service inside Debian using 'service' ===" "blue"
+# Step 7: Starting SSH in Termux and Debian
+print_message "=== Step 6: Starting SSH service in Termux and Debian ===" "blue"
+# Starting SSH service in Termux
+print_message "Starting SSH service in Termux..." "yellow"
+sshd
+
+print_message "SSH service started in Termux on port 8022." "green"
+
+# Step 8: Move to the lowermost directory and start SSH manually inside Debian
+print_message "=== Step 7: Starting SSH service inside Debian using 'service' ===" "blue"
 print_message "Navigating to the lowermost directory before starting the server..." "yellow"
 proot-distro login debian -- bash -c "
 cd ../../../ && cd ../../../ && cd ../../../ && cd ../../../
@@ -117,11 +125,24 @@ sudo service ssh start
 
 print_message "SSH service started inside Debian." "green"
 
-# Step 8: Expose the IP address and give SSH instructions
-print_message "=== Step 7: Exposing the IP address for SSH access ===" "blue"
+# Step 9: Expose the IP address and give SSH instructions
+print_message "=== Step 8: Exposing the IP address for SSH access ===" "blue"
+# Fetch IP address for Termux
 IP_ADDRESS=$(ip a | grep inet | grep -v inet6 | awk '{print $2}' | cut -d/ -f1)
-print_message "Setup complete. To SSH into Debian, use the following command:" "yellow"
-print_message "ssh utk@$IP_ADDRESS -p 9000" "green"
+if [ -z "$IP_ADDRESS" ]; then
+    print_message "Could not fetch IP address for Termux." "red"
+else
+    print_message "Setup complete. To SSH into Termux, use the following command:" "yellow"
+    print_message "ssh utk@$IP_ADDRESS -p 8022" "green"
+fi
+
+# Fetch IP address for Debian inside proot
+DEBIAN_IP_ADDRESS=$(proot-distro login debian -- bash -c "ip a | grep inet | grep -v inet6 | awk '{print $2}' | cut -d/ -f1" )
+if [ -z "$DEBIAN_IP_ADDRESS" ]; then
+    print_message "Could not fetch IP address for Debian." "red"
+else
+    print_message "Setup complete. To SSH into Debian, use the following command:" "yellow"
+    print_message "ssh utk@$DEBIAN_IP_ADDRESS -p 9000" "green"
+fi
 
 print_message "All tasks completed successfully!" "green"
-print_message "You can now SSH into the Debian environment from any machine on the same network using the command above." "green"
