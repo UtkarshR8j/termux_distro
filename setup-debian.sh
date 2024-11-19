@@ -107,12 +107,12 @@ echo 'utk:utkarsh1850' | sudo chpasswd
 print_message "SSH service set up and user 'utk' created inside Debian." "green"
 
 # Step 7: Move to the lowermost directory and start SSH manually inside Debian
-print_message "=== Step 6: Starting SSH service manually inside Debian ===" "blue"
+print_message "=== Step 6: Starting SSH service inside Debian using 'service' ===" "blue"
 print_message "Navigating to the lowermost directory before starting the server..." "yellow"
 proot-distro login debian -- bash -c "
 cd ../../../ && cd ../../../ && cd ../../../ && cd ../../../
-echo 'Starting SSH daemon manually inside Debian in foreground...'
-sudo /usr/sbin/sshd -D
+echo 'Starting SSH service inside Debian using service command...'
+sudo service ssh start
 "
 
 print_message "SSH service started inside Debian." "green"
