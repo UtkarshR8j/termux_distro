@@ -111,7 +111,7 @@ print_message "=== Step 6: Starting SSH service manually inside Debian ===" "blu
 print_message "Navigating to the lowermost directory before starting the server..." "yellow"
 proot-distro login debian -- bash -c "
 cd ../../../ && cd ../../../ && cd ../../../ && cd ../../../
-echo 'Starting SSH daemon manually inside Debian...'
+echo 'Starting SSH daemon manually inside Debian in foreground...'
 sudo /usr/sbin/sshd -D
 "
 
