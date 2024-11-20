@@ -15,7 +15,7 @@ progress_bar() {
 
     while [ $i -le $total ]; do
         completed=$(printf "%0.s#" $(seq 1 $((i * width / total)) ))
-        remaining=$(printf "%0.s-" $(seq 1 $((width - i * width / total)) ))
+        remaining=$(printf "%0.s-" $(seq 1 $((width - i * width / total)) )))
         percent=$((i * 100 / total))
         progress="\r[${completed}${remaining}] ${percent}%"
         echo -ne "$progress"
@@ -102,6 +102,8 @@ echo 'Creating user 'utk' inside Debian...'
 sudo useradd -m utk
 echo 'Setting password for user 'utk'...'
 echo 'utk:utkarsh1850' | sudo chpasswd
+echo 'Adding user 'utk' to sudoers inside Debian...'
+echo 'utk ALL=(ALL:ALL) ALL' | sudo tee -a /etc/sudoers
 "
 
 print_message "SSH service set up and user 'utk' created inside Debian." "green"
