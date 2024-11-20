@@ -117,26 +117,4 @@ echo 'Starting SSH server inside Debian...'
 "
 
 print_message "SSH service started inside Debian manually using /usr/sbin/sshd." "green"
-
-# Step 8: Expose the IP address and give SSH instructions
-print_message "=== Step 7: Exposing the IP address for SSH access ===" "blue"
-
-# Fetch IP address for Termux
-IP_ADDRESS=$(ip a | grep inet | grep -v inet6 | awk '{print $2}' | cut -d/ -f1)
-if [ -z "$IP_ADDRESS" ]; then
-    print_message "Could not fetch IP address for Termux." "red"
-else
-    print_message "Setup complete. To SSH into Termux, use the following command:" "yellow"
-    print_message "ssh utk@$IP_ADDRESS -p 8022" "green"
-fi
-
-# Fetch IP address for Debian inside proot
-DEBIAN_IP_ADDRESS=$(proot-distro login debian -- bash -c "ip a | grep inet | grep -v inet6 | awk '{print $2}' | cut -d/ -f1" )
-if [ -z "$DEBIAN_IP_ADDRESS" ]; then
-    print_message "Could not fetch IP address for Debian." "red"
-else
-    print_message "Setup complete. To SSH into Debian, use the following command:" "yellow"
-    print_message "ssh utk@$DEBIAN_IP_ADDRESS -p 9000" "green"
-fi
-
 print_message "All tasks completed successfully!" "green"
