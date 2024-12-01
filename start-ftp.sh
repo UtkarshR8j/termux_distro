@@ -32,16 +32,24 @@ else
     print_message "Termux storage permission already granted." "green"
 fi
 
-# Step 3: Start FTP Server with pyftpdlib
-print_message "=== Starting FTP server ===" "blue"
+# Step 3: Start FTP Server with pyftpdlib in a detached tmux session
+print_message "=== Starting FTP server in detached tmux session ===" "blue"
 
 # Set FTP server port and shared directory (adjust the directory if needed)
 FTP_PORT=2122
 FTP_DIR="$HOME"
+SESSION_NAME="ftp_session"
 
-print_message "Starting FTP server at port $FTP_PORT with write permissions, sharing $FTP_DIR" "yellow"
-python -m pyftpdlib -p $FTP_PORT -w -d $FTP_DIR
+# Create a new tmux session and run the FTP server in it
+tmux new-session -d -s $SESSION_NAME "python -m pyftpdlib -p $FTP_PORT -w -d $FTP_DIR"
 
-print_message "FTP server is now running. You can access it using FTP on your computer at ftp://<phone_ip_address>:$FTP_PORT/" "green"
+# Verify if tmux session is created and the FTP server is running
+if tmux has-session -t $SESSION_NAME 2>/dev/null; then
+    print_message "FTP server is now running in tmux session '$SESSION_NAME'. It will run perpetually in the background." "green"
+    print_message "To access the tmux session, run: tmux attach-session -t $SESSION_NAME" "yellow"
+else
+    print_message "Failed to start the tmux session." "red"
+fi
+
+print_message "You can access the FTP server using FTP on your computer at ftp://<phone_ip_address>:$FTP_PORT/" "green"
 print_message "To find your local IP address, run 'ifconfig' in Termux and look for the wlan IP." "yellow"
-
