@@ -3,23 +3,16 @@
 # Enable verbose output for debugging and seeing each command executed
 set -x
 
-# Function to display progress bar
-progress_bar() {
+# Function to display progress with a spinner
+spinner() {
     local i=0
     local total=$1
-    local width=50
-    local percent=0
-    local progress=""
-    local completed=""
-    local remaining=""
+    local spin='-\|/'
+    local delay=0.1
 
     while [ $i -le $total ]; do
-        completed=$(printf "%0.s#" $(seq 1 $((i * width / total)) ))
-        remaining=$(printf "%0.s-" $(seq 1 $((width - i * width / total)) ))
-        percent=$((i * 100 / total))
-        progress="\r[${completed}${remaining}] ${percent}%"
-        echo -ne "$progress"
-        sleep 0.1
+        printf "\r[${spin:i%4:1}] Step $((i + 1)) of $total"
+        sleep $delay
         ((i++))
     done
     echo ""
@@ -43,13 +36,13 @@ print_message "=== Step 1: Installing OpenSSH in Termux ===" "blue"
 pkg update && pkg upgrade -y
 
 print_message "Updating package lists..." "yellow"
-progress_bar 10
+spinner 10
 
 print_message "Installing OpenSSH..." "yellow"
 pkg install openssh -y
 
 print_message "OpenSSH installed successfully." "green"
-progress_bar 20
+spinner 20
 
 # Step 2: Configuring SSH to listen on port 8022 in Termux
 print_message "=== Step 2: Configuring SSH on port 8022 in Termux ===" "blue"
@@ -59,26 +52,26 @@ echo "PasswordAuthentication yes" >> $PREFIX/etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> $PREFIX/etc/ssh/sshd_config
 
 print_message "SSH configuration updated for port 8022." "green"
-progress_bar 30
+spinner 30
 
 # Step 3: Set password for Termux default user
 print_message "=== Step 3: Setting password for Termux default user ===" "blue"
 print_message "Setting password for the default user..." "yellow"
 echo -e "utkarsh1850\nutkarsh1850" | passwd
 print_message "Password for default user set to 'utkarsh1850'." "green"
-progress_bar 40
+spinner 40
 
 # Step 4: Install proot and proot-distro, then install Debian
 print_message "=== Step 4: Installing proot and proot-distro ===" "blue"
 pkg install proot proot-distro -y
 print_message "proot and proot-distro installed successfully." "green"
-progress_bar 50
+spinner 50
 
 # Step 5: Installing Debian using proot-distro
 print_message "Installing Debian using proot-distro..." "yellow"
 proot-distro install debian
 print_message "Debian installation completed." "green"
-progress_bar 60
+spinner 60
 
 # Step 6: Set up SSH inside Debian
 print_message "=== Step 5: Installing and configuring SSH inside Debian ===" "blue"
