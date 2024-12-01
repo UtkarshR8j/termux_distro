@@ -3,21 +3,6 @@
 # Enable verbose output for debugging and seeing each command executed
 set -x
 
-# Function to display progress with a spinner
-spinner() {
-    local i=0
-    local total=$1
-    local spin='-\|/'
-    local delay=0.1
-
-    while [ $i -le $total ]; do
-        printf "\r[${spin:i%4:1}] Step $((i + 1)) of $total"
-        sleep $delay
-        ((i++))
-    done
-    echo ""
-}
-
 # Function to print styled messages
 print_message() {
     local message=$1
@@ -31,18 +16,31 @@ print_message() {
     esac
 }
 
+# Function to display step counter
+step_counter() {
+    local current_step=$1
+    local total_steps=$2
+    echo "Step $current_step of $total_steps"
+}
+
+# Total number of steps
+total_steps=8
+current_step=1
+
 # Step 1: Install OpenSSH and set up SSH in Termux
 print_message "=== Step 1: Installing OpenSSH in Termux ===" "blue"
 pkg update && pkg upgrade -y
 
 print_message "Updating package lists..." "yellow"
-spinner 10
+step_counter $current_step $total_steps
+((current_step++))
 
 print_message "Installing OpenSSH..." "yellow"
 pkg install openssh -y
 
 print_message "OpenSSH installed successfully." "green"
-spinner 20
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 2: Configuring SSH to listen on port 8022 in Termux
 print_message "=== Step 2: Configuring SSH on port 8022 in Termux ===" "blue"
@@ -52,26 +50,30 @@ echo "PasswordAuthentication yes" >> $PREFIX/etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> $PREFIX/etc/ssh/sshd_config
 
 print_message "SSH configuration updated for port 8022." "green"
-spinner 30
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 3: Set password for Termux default user
 print_message "=== Step 3: Setting password for Termux default user ===" "blue"
 print_message "Setting password for the default user..." "yellow"
 echo -e "utkarsh1850\nutkarsh1850" | passwd
 print_message "Password for default user set to 'utkarsh1850'." "green"
-spinner 40
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 4: Install proot and proot-distro, then install Debian
 print_message "=== Step 4: Installing proot and proot-distro ===" "blue"
 pkg install proot proot-distro -y
 print_message "proot and proot-distro installed successfully." "green"
-spinner 50
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 5: Installing Debian using proot-distro
 print_message "Installing Debian using proot-distro..." "yellow"
 proot-distro install debian
 print_message "Debian installation completed." "green"
-spinner 60
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 6: Set up SSH inside Debian
 print_message "=== Step 5: Installing and configuring SSH inside Debian ===" "blue"
@@ -98,6 +100,8 @@ echo 'utk:utkarsh1850' | sudo chpasswd
 "
 
 print_message "SSH service set up and user 'utk' created inside Debian." "green"
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 7: Manually start SSH in Debian by logging into the proot environment
 print_message "=== Step 6: Starting SSH service inside Debian manually ===" "blue"
@@ -110,6 +114,8 @@ echo 'Starting SSH server inside Debian...'
 "
 
 print_message "SSH service started inside Debian manually using /usr/sbin/sshd." "green"
+step_counter $current_step $total_steps
+((current_step++))
 
 # Step 8: Expose the IP address and give SSH instructions
 print_message "=== Step 7: Exposing the IP address for SSH access ===" "blue"
