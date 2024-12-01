@@ -32,7 +32,11 @@ else
     print_message "Termux storage permission already granted." "green"
 fi
 
-# Step 3: Start FTP Server with pyftpdlib in a detached tmux session
+# Step 3: Ensure write permissions on the shared directory
+print_message "=== Ensuring write permissions for FTP server ===" "yellow"
+chmod -R 777 "$HOME"   # This grants full read, write, and execute permissions to everyone on the $HOME directory
+
+# Step 4: Start FTP Server with pyftpdlib in a detached tmux session
 print_message "=== Starting FTP server in detached tmux session ===" "blue"
 
 # Set FTP server port and shared directory (adjust the directory if needed)
