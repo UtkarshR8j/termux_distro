@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Enable verbose output for debugging and seeing each command executed
+# Enable verbose output for debugging
 set -x
 
 # Function to print styled messages
@@ -16,7 +16,7 @@ print_message() {
     esac
 }
 
-# Step 1: Check if tmux is installed, if not, install it
+# Step 1: Check if tmux is installed
 if ! command -v tmux &> /dev/null; then
     print_message "tmux not found, installing it..." "yellow"
     pkg install tmux -y
@@ -25,39 +25,55 @@ else
     print_message "tmux is already installed." "green"
 fi
 
-# Step 2: Start SSH in Termux using tmux
-print_message "=== Step 2: Starting SSH Server in Termux ===" "blue"
+# Step 2: Check and handle running SSH processes
+print_message "=== Step 2: Checking running SSH processes ===" "blue"
 
-# Check if tmux session for SSH already exists
-tmux has-session -t termux-ssh 2>/dev/null
-if [ $? != 0 ]; then
-    tmux new-session -d -s termux-ssh "sshd -D"   # Start SSH in detached tmux session
-    print_message "Started SSH server in Termux using tmux." "green"
-else
-    print_message "SSH server in Termux is already running." "green"
-fi
+check_and_restart() {
+    local instance=$1
+    local session_name=$2
+    local command=$3
 
-# Step 3: Start Debian in proot and SSH server inside Debian using tmux
-print_message "=== Step 3: Starting SSH Server inside Debian ===" "blue"
+    # Check if SSH process is running
+    if pgrep -f "$command" > /dev/null; then
+        print_message "SSH process is running in $instance." "yellow"
+        read -p "Do you want to kill and restart the SSH process in $instance? (y/n): " user_input
+        if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+            print_message "Killing the existing SSH process in $instance..." "red"
+            pkill -f "$command"
+            tmux kill-session -t "$session_name" 2>/dev/null
+            start_ssh "$instance" "$session_name" "$command"
+        else
+            print_message "Skipping restart for SSH in $instance." "yellow"
+        fi
+    else
+        print_message "No SSH process found in $instance. Starting it now..." "green"
+        start_ssh "$instance" "$session_name" "$command"
+    fi
+}
 
-# Check if tmux session for Debian already exists
-tmux has-session -t debian-ssh 2>/dev/null
-if [ $? != 0 ]; then
-    tmux new-session -d -s debian-ssh "
-        proot-distro login debian -- bash -c \"
-        echo 'Starting SSH server inside Debian...'
-        /usr/sbin/sshd -D
-        \""
-    print_message "Started SSH server inside Debian using tmux." "green"
-else
-    print_message "SSH server inside Debian is already running." "green"
-fi
+start_ssh() {
+    local instance=$1
+    local session_name=$2
+    local command=$3
 
-# Step 4: Provide instructions to the user
+    # Start tmux session with the given command
+    tmux has-session -t "$session_name" 2>/dev/null
+    if [ $? != 0 ]; then
+        tmux new-session -d -s "$session_name" "$command"
+        print_message "Started SSH server in $instance using tmux." "green"
+    else
+        print_message "SSH server in $instance is already running in tmux." "green"
+    fi
+}
+
+# Handle SSH for Termux
+check_and_restart "Termux" "termux-ssh" "sshd -D"
+
+# Handle SSH for Debian
+check_and_restart "Debian" "debian-ssh" "proot-distro login debian -- /usr/sbin/sshd -D"
+
+# Step 3: Provide user instructions
 print_message "=== All servers are now running in the background ===" "blue"
 print_message "To view logs or interact with any of the sessions, run the following commands:" "yellow"
 print_message "  tmux attach-session -t termux-ssh  # For Termux SSH" "yellow"
 print_message "  tmux attach-session -t debian-ssh  # For Debian SSH" "yellow"
-
-# End of script
-
