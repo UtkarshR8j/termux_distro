@@ -77,3 +77,5 @@ print_message "=== All servers are now running in the background ===" "blue"
 print_message "To view logs or interact with any of the sessions, run the following commands:" "yellow"
 print_message "  tmux attach-session -t termux-ssh  # For Termux SSH" "yellow"
 print_message "  tmux attach-session -t debian-ssh  # For Debian SSH" "yellow"
+
+#end
