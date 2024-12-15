@@ -70,3 +70,6 @@ print_message "SSH configured successfully. You can now SSH into Debian using th
 print_message "ssh root@<Termux_IP> -p 9000 (password: utkarsh1850)" "green"
 
 print_message "Setup complete!" "green"
+
+
+##requirements: termux>tmux>qemu>ssh
