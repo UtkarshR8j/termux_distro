@@ -49,7 +49,7 @@ chmod 0755 /run/sshd
 sed -i 's/^#Port 22/Port 9000/' /etc/ssh/sshd_config
 sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
-echo 'root:utkarsh2850' | chpasswd
+echo 'root:utkarsh1850' | chpasswd
 "
 print_message "Root login enabled and SSH configured inside Debian." "green"
 
